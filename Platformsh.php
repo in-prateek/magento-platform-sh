@@ -7,7 +7,10 @@ class Platformsh
     const PREFIX_SECURE = 'https://';
     const PREFIX_UNSECURE = 'http://';
 
-    protected $debugMode = false;
+    // This is the Magento root
+    protected $webRoot = 'web';
+
+    protected $debugMode = TRUE;
 
     protected $platformReadWriteDirs = ['var', 'app/etc', 'media'];
 
@@ -85,10 +88,10 @@ class Platformsh
         $this->log("Copying read/write directories to temp directory.");
 
         foreach ($this->platformReadWriteDirs as $dir) {
-            $this->execute(sprintf('mkdir -p ../init/%s', $dir));
-            $this->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ../init/%s/"', $dir, $dir));
-            $this->execute(sprintf('rm -rf %s', $dir));
-            $this->execute(sprintf('mkdir %s', $dir));
+            $this->execute(sprintf('mkdir -p init/%s', $dir));
+            $this->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/%s/* init/%s/"', $this->webRoot, $dir, $dir));
+            $this->execute(sprintf('rm -rf %s/%s', $this->webRoot, $dir));
+            $this->execute(sprintf('mkdir %s/%s', $this->webRoot, $dir));
         }
     }
 
@@ -104,11 +107,11 @@ class Platformsh
         $this->log("Copying read/write directories back.");
 
         foreach ($this->platformReadWriteDirs as $dir) {
-            $this->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ../init/%s/* %s/ || true"', $dir, $dir));
+            $this->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R init/%s/* %s/%s/ || true"', $dir, $this->webRoot, $dir));
             $this->log(sprintf('Copied directory: %s', $dir));
         }
 
-        if (!file_exists('app/etc/local.xml')) {
+        if (!file_exists('web/app/etc/local.xml')) {
             $this->installMagento();
         } else {
             $this->updateMagento();
@@ -189,7 +192,7 @@ class Platformsh
         $urlSecure = $this->urls['secure'][''];
 
         $this->execute(
-            "php -f install.php -- \
+            "php -f {$this->webRoot}/install.php -- \
             --default_currency $this->defaultCurrency \
             --url $urlUnsecure \
             --secure_base_url $urlSecure \
@@ -281,7 +284,7 @@ class Platformsh
     {
         $this->log("Clearing temporary directory.");
 
-        $this->execute('rm -rf ../init/*');
+        $this->execute('rm -rf init/*');
     }
 
     /**
@@ -293,7 +296,7 @@ class Platformsh
     {
         $this->log("Clearing cache.");
 
-        $this->execute('rm -rf var/cache/* var/full_page_cache/* media/css/* media/js/*');
+        $this->execute("rm -rf {$this->webRoot}/var/cache/* {$this->webRoot}/var/full_page_cache/* {$this->webRoot}/media/css/* {$this->webRoot}/media/js/*");
     }
 
     /**
@@ -303,7 +306,7 @@ class Platformsh
     {
         $this->log("Updating local.xml database configuration.");
 
-        $configFileName = "app/etc/local.xml";
+        $configFileName = "{$this->webRoot}/app/etc/local.xml";
 
         $config = simplexml_load_file($configFileName);
 
