@@ -6,7 +6,7 @@
 name: mymagento
 
 # The toolstack used to build the application.
-type: php:5.5
+type: php:5.6
 build:
     flavor: composer
 
@@ -22,92 +22,30 @@ relationships:
 # The configuration of app when it is exposed to the web.
 web:
     # The public directory of the app, relative to its root.
-    document_root: "/"
-    # The front-controller script to send non-static requests to.
-    passthru: "/index.php"
-    whitelist:
-        # CSS and Javascript.
-        - \.css$
-        - \.js$
-        - \.map$
-        - \.hbs$
-
-         # image/* types.
-        - \.gif$
-        - \.jpe?g$
-        - \.png$
-        - \.tiff?$
-        - \.wbmp$
-        - \.ico$
-        - \.jng$
-        - \.bmp$
-        - \.svgz?$
-
-        # audio/* types.
-        - \.midi?$
-        - \.mpe?ga$
-        - \.mp2$
-        - \.mp3$
-        - \.m4a$
-        - \.ra$
-        - \.weba$
-
-        # video/* types.
-        - \.3gpp?$
-        - \.mp4$
-        - \.mpe?g$
-        - \.mpe$
-        - \.ogv$
-        - \.mov$
-        - \.webm$
-        - \.flv$
-        - \.mng$
-        - \.asx$
-        - \.asf$
-        - \.wmv$
-        - \.avi$
-
-        # application/ogg.
-        - \.ogx$
-
-        # application/x-shockwave-flash.
-        - \.swf$
-
-        # application/java-archive.
-        - \.jar$
-
-        # fonts types.
-        - \.ttf$
-        - \.eot$
-        - \.woff$
-        - \.otf$
-
-        # document types
-        - \.htm$
-        - \.html$
-
-        # robots.txt.
-        - /robots\.txt$
+    locations:
+        "/":
+            root: 'web'
+            passthru: '/index.php'
 
 # The size of the persistent disk of the application (in MB).
 disk: 2048
 
 # The mounts that will be performed when the package is deployed.
 mounts:
-    "/public/var": "shared:files/var"
-    "/public/app/etc": "shared:files/etc"
-    "/public/media": "shared:files/media"
+    "/web/var": "shared:files/var"
+    "/web/app/etc": "shared:files/etc"
+    "/web/media": "shared:files/media"
 
 # The hooks executed at various points in the lifecycle of the application.
 hooks:
     # We run build hooks before your application has been packaged.
     build: |
-        cd ~/public
-        /usr/bin/php ./magento-build.php
+        pwd
+        /usr/bin/php /app/magento-build.php
     # We run deploy hook after your application has been deployed and started.
     deploy: |
-        cd ~//public
-        /usr/bin/php ./magento-deploy.php
+        pwd
+        /usr/bin/php /app/magento-deploy.php
 # Default Magento cron job
 crons:
     mymagento:
