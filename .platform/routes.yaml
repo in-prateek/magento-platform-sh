@@ -5,4 +5,4 @@
 
 "http://{default}/":
     type: upstream
-    upstream: "mymagento:php"
+    upstream: "app:php"
