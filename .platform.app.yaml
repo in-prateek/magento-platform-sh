@@ -3,7 +3,7 @@
 
 
 # The name of this app. Must be unique within a project.
-name: mymagento
+name: app
 
 # The toolstack used to build the application.
 type: php:5.6
